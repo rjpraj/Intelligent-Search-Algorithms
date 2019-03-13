@@ -1,0 +1,63 @@
+import math
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+def fit(x1, x2):
+    temp1 = np.sum(np.array([(i*math.cos((i+1)*x1 + i)) for i in range(1,6)]))
+    temp2 = np.sum(np.array([(i*math.cos((i+1)*x2 + i)) for i in range(1, 6)]))
+    return temp1*temp2
+
+#Return the fitness value
+def fitness(x1, x2):
+    return 225-fit(x1, x2)
+
+def eval_fit(x, gbest, pbest):
+    if fitness(x[0], x[1]) > fitness(gbest[0], gbest[1]):
+        gbest = x
+    if fitness(x[0], x[1]) > fitness(pbest[0], pbest[1]):
+        pbest = x
+    return gbest, pbest
+
+W = 0.7
+c1 = 0.2
+c2 = 0.6
+def update(x, v, gbest, pbest):
+    vn = (W * v + c1 * np.random.random() * (pbest - x) + c2 * np.random.random() * (gbest - x))/1.5
+    xn = vn + x
+    if xn[0] > 255:
+        xn[0] = 255
+    if xn[1] > 255:
+        xn[1] = 255
+    return xn, vn
+
+N = 10 #Swarm Particles
+E = 1000 #Iterations
+gbest = None
+obj = {}
+
+def pso():
+    
+    t = np.random.random_sample((N, 2))
+    X = np.array(255*t)
+    t = np.random.random_sample((N, 2))
+    V = np.array(255*t)
+    
+    pbest = np.copy(X)
+    gbest = np.copy(X[0])
+    
+    for j in range(N):
+        gbest, _ = eval_fit(X[j], gbest, pbest[j])
+    
+    for i in range(E):
+        for j in range(N):
+            gbest, pbest[j] = eval_fit(X[j], gbest, pbest[j])
+            X[j], V[j] = update(X[j], V[j], gbest, pbest[j])
+        obj[i] = fit(gbest[0], gbest[1])
+        
+    return gbest
+
+gbest = pso()
+
+print('Best Position  = {}'.format(gbest))
+print('Best Objective Value  = {}'.format(fit(gbest[0], gbest[1])))
