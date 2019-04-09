@@ -1,0 +1,121 @@
+import random
+import numpy as np 
+
+#/*first we create a module to calculate */
+def shubert(x):
+    x1=x[0][0]
+    x2=x[0][1]
+    sum1 = 0
+    for i in range(1,6):
+       sum1 = sum1 + i * np.cos((i+1)* x1 + i);
+ 
+    sum2 = 0
+    for i in range(1,6):
+       sum2 = sum2 + i * np.cos((i+1) * x2 + i)
+      
+    result = sum1 * sum2
+    return(result)
+
+def Mycrossover(parent1,parent2):
+    dimCol= len(parent1)-1
+    k = np.zeros((1, 2))
+    k[0][0]= random.randint(1, dimCol)
+    k[0][1]= random.randint(1, dimCol)
+    n1 = max(k)
+    n2 = min(k)
+    temp = parent1[1,n2:n1]
+    parent1[1,n2:n1]=parent2[1,n2:n1]
+    parent2[1,n2:n1]=temp
+
+def Mymutation(parent1):
+    dimCol=len(parent1)
+    k1= random.randint(1, dimCol)
+    parent1[1,k1] != parent1[1,k1]
+
+parentChromosomeN = np.zeros((51,17)) #50
+
+for j in range(1,51): #* initializing 50 chrmosomes;
+    for i in range(1,17):
+        parentChromosomeN[j][i]= random.uniform(0,1)>=0.5
+
+
+x = np.zeros((1, 2))  # * initializing 1x2 matrix with all zero;
+for k in range (1,51):
+    for i in range(1,9):#* binary to decimal conversion;
+        x[0]= x[0]+parentChromosomeN[k,9-i]*2**(i-1)
+        x[1]= x[0]+parentChromosomeN[k,17-i]*2**(i-1)
+	
+    parentChromosomeN[k,17]=shubert(x);
+
+itter=1
+while (itter<=50):
+	#/*tournament selection */
+    matingPool=np.zeros((1,50))
+    k=1
+    while (k<=50):
+        randNum1=random.randint(1,50)
+        randNum2=random.randint(1,50)
+        while (randNum1 == randNum2):
+            randNum2=random.randint(1,50)
+		
+        if (parentChromosomeN[randNum1][17]<parentChromosomeN[randNum2][17]):
+			matingPool[1][k]=randNum1
+        else:
+            matingPool[1][k]=randNum2
+            k=k+1
+
+	#/*Crossover and mutation*/
+	#/*define crossover and mutation probability*/
+	#/*let crossover prob be 0.8 and mutation be 0.2*/
+	#/*i.e. we apply crossover on 80% and mutation on remaining 20%*/
+    m=1
+    childrenChromosomeN=np.zeros((50,17))
+    while (m<40): #*0.8*50=40;
+        chromosomeId1=matingPool[1][m] 
+        chromosomeId2=matingPool[1][m+1]
+        parent1=parentChromosomeN[chromosomeId1][1:16]
+        parent2=parentChromosomeN[chromosomeId2][1:16]
+        Mycrossover(parent1,parent2)
+		#*data in parents itself will be changed because of pointer;
+        childrenChromosomeN[m][1:16]=parent1
+        childrenChromosomeN[m+1][1:16]=parent2
+        m=m+2
+	
+
+    while(m<=50):
+        chromosomeId1=matingPool[1,m]
+        parent1=parentChromosomeN[chromosomeId1,1:16]
+        Mymutation(parent1)
+        childrenChromosomeN[m,1:16]=parent1
+        m=m+1
+	
+
+
+    x=np.zeros((1,2)) #* initializing 1x2 matrix with all zero;
+    for k in range(1,51):
+        for i in range(1,9):#* binary to decimal conversion
+            x[0]= x[0]+childrenChromosomeN[k][9-i]*2**(i-1)
+            x[1]= x[1]+childrenChromosomeN[k][17-i]*2**(i-1)
+
+        childrenChromosomeN[k][17]=shubert(x)
+                                                   
+
+	#/*Selecting elite chromosomes*/
+	#combinedMatrix = parentChromosomeN`|| childrenChromosomeN` 
+	#combinedMatrix=combinedMatrix`
+    combinedMatrix=np.concatenate((np.transpose(parentChromosomeN),np.transpose(childrenChromosomeN)), axis=0)
+    combinedMatrix=np.transpose(combinedMatrix)
+    sort(combinedMatrix,{17}) 
+    parentChromosomeN=combinedMatrix[1:51][:]
+	#/*print parentChromosomeN;*/
+    itter=itter+1
+ 
+x=np.zeros((1,2))# * initializing 1x2 matrix with all zero;
+for i in range(1,9):#* binary to decimal conversion;
+    x[0]= x[0]+parentChromosomeN[1][9-i]*2**(i-1)
+    x[1]= x[1]+parentChromosomeN[1][17-i]*2**(i-1)
+ 
+print ("Final Solution");
+print(parentChromosomeN[1][17]);
+print (x[0])
+print (x[1])
